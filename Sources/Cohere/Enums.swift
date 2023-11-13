@@ -7,7 +7,6 @@
 
 import Foundation
 
-public class Enumerations {
     public enum CohereModel : String {
         case command = "command"
         case commandNightly = "command-nightly"
@@ -43,10 +42,9 @@ public class Enumerations {
         case englishLightV2 = "embed-english-light-v2.0"
         case multilingualV2 = "embed-multilingual-v2.0"
     }
-    public enum InputType : String {
-        case searchDocument = "search_document"
-        case searchQuery = "search_query"
-        case classificatinon = "classification"
-        case clustering = "clustering"
-    }
+public enum InputType : String {
+    case searchDocument = "search_document"
+    case searchQuery = "search_query"
+    case classificatinon = "classification"
+    case clustering = "clustering"
 }

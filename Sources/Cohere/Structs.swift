@@ -7,13 +7,90 @@
 
 import Foundation
 
+
+public struct Chat: Codable {
+    public let responseID, text, generationID: String?
+    public let tokenCount: TokenCount?
+    public let meta: Meta?
+
+    public enum CodingKeys: String, CodingKey {
+        case responseID
+        case text
+        case generationID
+        case tokenCount
+        case meta
+    }
+}
+// MARK: - TokenCount
+public struct TokenCount: Codable {
+    public let promptTokens, responseTokens, totalTokens, billedTokens: Int?
+
+    public enum CodingKeys: String, CodingKey {
+        case promptTokens
+        case responseTokens
+        case totalTokens
+        case billedTokens
+    }
+}
+public struct ChatHistory {
+    public let role : role
+    public let message : String
+    public let username : String
+    
+    public enum role : String {
+        case ChatBot = "CHATBOT"
+        case User = "USER"
+    }
+    public func dict() -> [String : Any] {
+        return [
+            "role": self.role.rawValue,
+            "message": message,
+            "user_name": username
+          ]
+    }
+    public init(role: role, message: String, username: String) {
+        self.role = role
+        self.message = message
+        self.username = username
+    }
+}
+public struct Example {
+    public let text : String
+    public let label : Any
+    
+    public init(text: String, label: Any) {
+        self.text = text
+        self.label = label
+    }
+    public func dict() -> [String : Any] {
+        return ["text" : self.text, "label" : self.label]
+    }
+}
+public struct Connector {
+    public let text : String
+    public let label : Any
+    
+    public init(text: String, label: Any) {
+        self.text = text
+        self.label = label
+    }
+    public func dict() -> [String : Any] {
+        return ["text" : self.text, "label" : self.label]
+    }
+}
 public struct Classification: Codable {
-    let id: String?
-    let classifications: [ClassificationElement]?
-    let meta: Meta?
+    public let id: String?
+    public let classifications: [ClassificationElement]?
+    public let meta: Meta?
+
+    public init(id: String?, classifications: [ClassificationElement]?, meta: Meta?) {
+        self.id = id
+        self.classifications = classifications
+        self.meta = meta
+    }
 }
 
-    // MARK: - ClassificationElement
+// MARK: - ClassificationElement
 public struct ClassificationElement: Codable {
     public let classificationType: String?
     public let confidence: Double?
@@ -22,36 +99,70 @@ public struct ClassificationElement: Codable {
     public let labels: Labels?
     public let prediction: String?
     public let predictions: [String]?
-    
+
     public enum CodingKeys: String, CodingKey {
         case classificationType = "classification_type"
         case confidence, confidences, id, input, labels, prediction, predictions
     }
-}
 
-    // MARK: - Labels
-public struct Labels: Codable {
-    public let cancellingCoverage, changeAccountSettings, filingAClaimAndViewingStatus, findingPolicyDetails: CancellingCoverage?
-    
-    public enum CodingKeys: String, CodingKey {
-        case cancellingCoverage = "Cancelling coverage"
-        case changeAccountSettings = "Change account settings"
-        case filingAClaimAndViewingStatus = "Filing a claim and viewing status"
-        case findingPolicyDetails = "Finding policy details"
+    public init(classificationType: String?, confidence: Double?, confidences: [Double]?, id: String?, input: String?, labels: Labels?, prediction: String?, predictions: [String]?) {
+        self.classificationType = classificationType
+        self.confidence = confidence
+        self.confidences = confidences
+        self.id = id
+        self.input = input
+        self.labels = labels
+        self.prediction = prediction
+        self.predictions = predictions
     }
 }
 
-    // MARK: - CancellingCoverage
-public struct CancellingCoverage: Codable {
-    public let confidence: Double?
+// MARK: - Labels
+public struct Labels: Codable {
+    public let notSpam, spam: Spam?
+
+    enum CodingKeys: String, CodingKey {
+        case notSpam = "Not spam"
+        case spam = "Spam"
+    }
+
+    public init(notSpam: Spam?, spam: Spam?) {
+        self.notSpam = notSpam
+        self.spam = spam
+    }
 }
 
-public enum CodingKeys: String, CodingKey {
-    case cancellingCoverage = "Cancelling coverage"
-    case changeAccountSettings = "Change account settings"
-    case filingAClaimAndViewingStatus = "Filing a claim and viewing status"
-    case findingPolicyDetails = "Finding policy details"
+// MARK: - Spam
+public struct Spam: Codable {
+    public let confidence: Double?
+
+    init(confidence: Double?) {
+        self.confidence = confidence
+    }
 }
+
+// MARK: - Meta
+public struct Meta: Codable {
+    public let apiVersion: APIVersion?
+
+    enum CodingKeys: String, CodingKey {
+        case apiVersion = "api_version"
+    }
+
+    init(apiVersion: APIVersion?) {
+        self.apiVersion = apiVersion
+    }
+}
+
+// MARK: - APIVersion
+public struct APIVersion: Codable {
+    public let version: String?
+
+    init(version: String?) {
+        self.version = version
+    }
+}
+
 public struct Generation: Codable {
     public let id: String?
     public let generations: [GenerationElement]?
@@ -67,20 +178,6 @@ public struct GenerationElement: Codable {
         case id, text
         case finishReason = "finish_reason"
     }
-}
-
-    // MARK: - Meta
-public struct Meta: Codable {
-    public let apiVersion: APIVersion?
-    
-    public enum CodingKeys: String, CodingKey {
-        case apiVersion = "api_version"
-    }
-}
-
-    // MARK: - APIVersion
-public struct APIVersion: Codable {
-    public let version: String?
 }
 public struct Embedding: Codable {
     public let id: String?
@@ -117,18 +214,18 @@ public struct LanguageData: Codable {
     }
 }
 public struct Summarize: Codable {
-    let id, summary: String?
-    let meta: Meta?
+    public let id, summary: String?
+    public let meta: Meta?
 }
 public struct Rerank: Codable {
-    let id: String?
-    let results: [Rankings]?
-    let meta: Meta?
+    public let id: String?
+    public let results: [Rankings]?
+    public let meta: Meta?
 }
     // MARK: - Result
 public struct Rankings: Codable {
-    let index: Int?
-    let relevanceScore: Double?
+    public let index: Int?
+    public let relevanceScore: Double?
     
     enum CodingKeys: String, CodingKey {
         case index
