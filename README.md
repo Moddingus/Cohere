@@ -15,7 +15,7 @@ To get started with the Cohere API Swift Package, simply follow the steps below:
 Install the package using Swift Package Manager (SPM) by adding it as a dependency in your project's Package.swift file.
 
 ## Usage 
-Import the Cohere API Swift Package in your Swift project and start get the API resonse from 
+Import the Cohere API Swift Package in your project and get API resonses via the following methods.
 
 ### Classification
 This method generates makes a prediction about which label fits the specified text inputs best.
@@ -24,32 +24,32 @@ import Cohere
 
 let co = CohereClient(API_KEY: "<API_KEY>")
 
-co.classify(
-    model:
-        .command,
-    inputs: [
-        "Confirm your email address",
-        "hey i need u to send some $"
-    ],
-    examples:
-    [
-        Example(text: "Dermatologists don't like her!", label: "Spam"),
-        Example(text: "Hello, open to this?", label: "Spam"),
-        Example(text: "I need help please wire me $1000 right now", label: "Spam"),
-        Example(text: "Nice to know you ;)", label: "Spam"),
-        Example(text: "Please help me?", label: "Spam"),
-        Example(text: "Your parcel will be delivered today", label: "Not spam"),
-        Example(text: "Review changes to our Terms and Conditions", label: "Not spam"),
-        Example(text: "Weekly sync notes", label: "Not spam"),
-        Example(text: "Re: Follow up from today’s meeting", label: "Not spam"),
-        Example(text: "Pre-read for tomorrow", label: "Not spam")
-    ]) { response in
-        if let _response = response?.classifications {
-            for i in _response {
-                print(i.prediction!)
-            }
+Task.init {
+    if let classification = await co.classify(
+        model:
+            .command,
+        inputs: [
+            "Confirm your email address",
+            "hey i need u to send some $"
+        ],
+        examples:
+        [
+            Example(text: "Dermatologists don't like her!", label: "Spam"),
+            Example(text: "Hello, open to this?", label: "Spam"),
+            Example(text: "I need help please wire me $1000 right now", label: "Spam"),
+            Example(text: "Nice to know you ;)", label: "Spam"),
+            Example(text: "Please help me?", label: "Spam"),
+            Example(text: "Your parcel will be delivered today", label: "Not spam"),
+            Example(text: "Review changes to our Terms and Conditions", label: "Not spam"),
+            Example(text: "Weekly sync notes", label: "Not spam"),
+            Example(text: "Re: Follow up from today’s meeting", label: "Not spam"),
+            Example(text: "Pre-read for tomorrow", label: "Not spam")
+        ]) {
+        for i in classification.classifications! {
+            print(i.prediction!)
         }
     }
+}
 ```
 #### Output:
 ```swift
