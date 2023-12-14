@@ -114,7 +114,7 @@ The chat endpoint allows users to have conversations with a Large Language Model
 ```swift
 import Cohere
 
-let co = CohereClient(API_KEY: "XQ0UUAWgS9ZDFt6aaDlGyUJcX4RJEgyqWXPG7drq")
+let co = CohereClient(API_KEY: "<API_KEY>")
 
 Task.init {
     if let res = await co.addMessage(message: "Hi my name is Moddingus", model: .command) {
