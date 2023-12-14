@@ -4,10 +4,16 @@ import Foundation
 public class CohereClient {
     private let API_KEY : String
     private let headers : [String : String]
-    
     private var chatHistory : [ChatHistory] = []
-    
-    public func clearChatHistory() {
+        
+    public func addMessage(message : String, model : CohereModel = .command, temperature : Double = 0.75, overridePreamble : String = "") async -> ChatRes? {
+        chatHistory.append(ChatHistory(role: .User, message: message, username: "User"))
+        if let res = await chat(message: message, model: model, overridePreable: "", stream: false, chatHistory: chatHistory, temperature: temperature) {
+            chatHistory.append(ChatHistory(role: .ChatBot, message: res.text!, username: "User"))
+            return res
+        } else {return nil}
+    }
+    public func clearHistory() {
         chatHistory.removeAll()
     }
     
@@ -48,21 +54,24 @@ public class CohereClient {
             return nil
         }
     }
-    public func generate(prompt : String, model : CohereModel = .command, generations : Int = 1, stream : Bool = false) async -> Generation? {
+    public func generate(prompt : String, model : CohereModel = .command, numGenerations : Int = 1, stream : Bool = false, maxTokens : Int = 999, temperature : Double = 0.75) async -> Generation? {
+        
         let parameters = [
-            "truncate": "END",
-            "return_likelihoods": "NONE",
-            "prompt": prompt,
-            "num_generations": generations,
-            "stream": stream,
-            "model": model.rawValue
+          "truncate": "END",
+          "return_likelihoods": "NONE",
+          "prompt": prompt,
+          "num_generations": numGenerations,
+          "stream": stream,
+          "model": model.rawValue,
+          "max_tokens": maxTokens,
+          "temperature" : min(max(0, temperature), 5)
         ] as [String : Any]
-        
-        guard let postData = try? JSONSerialization.data(withJSONObject: parameters, options: []) else { return nil }
-        
+
+        guard let postData = try? JSONSerialization.data(withJSONObject: parameters, options: []) else {return nil}
+
         let request = NSMutableURLRequest(url: NSURL(string: "https://api.cohere.ai/v1/generate")! as URL,
-                                          cachePolicy: .useProtocolCachePolicy,
-                                          timeoutInterval: 10.0)
+                                                cachePolicy: .useProtocolCachePolicy,
+                                            timeoutInterval: 10.0)
         request.httpMethod = "POST"
         request.allHTTPHeaderFields = headers
         request.httpBody = postData as Data
@@ -124,34 +133,23 @@ public class CohereClient {
             return nil
         }
     }
-    public func chat(message: String, model : CohereModel = .command, overridePreable : String = "", stream : Bool = false) async -> Chat? {
+    public func chat(message: String, model : CohereModel = .command, overridePreable : String = "", stream : Bool = false, chatHistory : [ChatHistory] = [], temperature : Double = 0.75) async -> ChatRes? {
         let parameters = [
-            "message": "Hello",
+            "message": message,
             "model": model.rawValue,
             "stream": stream,
             "preamble_override": "",
             "chat_history": chatHistory.map {$0.dict()},
             "conversation_id": "",
             "prompt_truncation": "OFF",
-            "connectors": [
+            /*"connectors": [
                 [
-                  "options": ["site": ""],
-                  "id": ""
-                ] as [String : Any]
-              ],
-              "search_queries_only": false,
-              "documents": [
-                [
-                  "id": "",
-                  "bruh": ""
                 ]
-              ],
+              ],*/
+              "search_queries_only": false,
               "citation_quality": "fast",
-              "temperature": 0
+              "temperature": min(max(0, temperature), 5)
         ] as [String : Any]
-        chatHistory.append(
-            ChatHistory(role: .User, message: message, username: "")
-        )
         
         guard let postData = try? JSONSerialization.data(withJSONObject: parameters, options: []) else {return nil}
         
@@ -163,7 +161,7 @@ public class CohereClient {
         request.httpBody = postData as Data
         
         do {
-            return try await MakeURLRequest(request: request, jsonDecoder: Chat.self)
+             return try await MakeURLRequest(request: request, jsonDecoder: ChatRes.self)
         }
         catch {
             print(error)

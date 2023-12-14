@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct Chat: Codable {
+public struct ChatRes: Codable {
     public let responseID, text, generationID: String?
     public let tokenCount: TokenCount?
     public let meta: Meta?
