@@ -1,5 +1,8 @@
 # Cohere API Swift Package
+
 The Cohere API Swift Package is a comprehensive Swift library that provides seamless integration with the Cohere API. It allows developers to easily utilize the full range of features and capabilities offered by the Cohere API in their Swift projects. See the [Cohere about page](https://docs.cohere.com/reference/about) for more information about the Cohere AI.
+
+## Very Important: Stream Mode Is Not Working Right Now 😢
 
 ## Requirements
 * Swift 5.0 or later
@@ -51,7 +54,7 @@ Task.init {
     }
 }
 ```
-#### Output:
+#### Sample Output:
 ```swift
 "Not spam"
 "Spam"
@@ -66,21 +69,20 @@ import Cohere
 
 let co = CohereClient(API_KEY: "<API_KEY>")
 
-co.generate(prompt: "Please explain to me how LLMs work", model: .command, generations: 1, stream: false) { response in
-    if let _response = response?.generations?.first?.text {
-        print(_response)
+Task.init {
+    if let res = await co.generate(prompt: "Please explain to me how LLMs work", model: .command, generations: 1, stream: false, temperature: 0.75) {
+        print(res.generations?.first?.text)
     }
 }
 ```
-#### Output:
+#### Sample Output:
 ```swift
 "LLMs, or Large Language Models, are a type of neural network..."
 ```
-Ouputs may vary
 
 #### Note:
 * The maximum number of generations is 5. 5 will take a really long time.
-* Generations are one-off requests and do not remeber previous prompts. See the chat method for this feature
+* Generations are one-off requests and do not 'remeber' previous prompts. See the chat method for this feature
 * Stream (bool) determines whether the response will be returned at once or word by word.
 
 ### Embedding
@@ -92,15 +94,14 @@ let co = CohereClient(API_KEY: "<API_KEY>")
 
 co.embed(texts: ["hello", "goodbye"], model: .englishV2, inputType: .classificatinon) { response in
     if let _response = response.embeddings {
-        print(_response)
+        print(_response) 
     }
 }
 ```
-#### Output:
+#### Sample Output:
 ```swift
 [[1.6142578, 0.24841309, 0.5385742, -1.6630859, -0.27783203, 0.35888672,...]] 
 ```
-Outputs may vary
 
 #### Note:
 * Gives you a matrix with a lot of numbers.
@@ -109,31 +110,35 @@ Outputs may vary
 * The Maximum number of texts per call is 96
 
 ### Chat
-The chat endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. If using the default method, messages to and from the bot will be saved to history. History can be cleared using `.clearChatHistory` method. You may also provide the id of an existing conversation to resume a chat. If the id you provide does not yet exist a new conversation will be created.
+The chat endpoint allows users to have conversations with a Large Language Model (LLM) from Cohere. If using the default method, messages to and from the bot will be saved to history. History can be cleared using `.clearChatHistory` method. You may also provide the id of an existing conversation to resume a chat. If the id you provide does not yet exist a new conversation will be created. 
 ```swift
 import Cohere
 
-let co = CohereClient(API_KEY: "<API_KEY>")
+let co = CohereClient(API_KEY: "XQ0UUAWgS9ZDFt6aaDlGyUJcX4RJEgyqWXPG7drq")
 
-co.embed(texts: ["hello", "goodbye"], model: .englishV2, inputType: .classificatinon) { response in
-    if let _response = response.embeddings {
-        print(_response)
+Task.init {
+    if let res = await co.addMessage(message: "Hi my name is Moddingus", model: .command) {
+        print(res.text)
+    }
+    if let res = await co.addMessage(message: "Say my name", model: .command) {
+        print(res.text)
     }
 }
 ```
-#### Output:
+#### Sample Output:
 ```swift
-[[1.6142578, 0.24841309, 0.5385742, -1.6630859, -0.27783203, 0.35888672,...]] 
+"Nice to meet you, Moddingus!..."
+
+"Sure, my friend. Let me proudly pronounce your name -- Moddingus. \n\nNow, how does it feel to hear your name being gracefully expressed by an AI chatbot? \n\nWould you like me to repeatedly chant your name in a poetic manner, or should I move on to another topic of your choice?..."
 ```
-Outputs may vary
 
 #### Note:
 * Will remember previous prompts
-* 
+* Each client instance has one chat history. Open a new client for a new chat instance
 
 
 
 For more information and detailed usage examples, please refer to the [Cohere API Docs](https://docs.cohere.com/reference/about).
 
 ## Support and Feedback
-If you encounter any issues or have any questions or feedback regarding the Cohere API Swift Package, please don't hesitate to reach out to our support team or open an issue on the package's GitHub repository. Feel free to fork and make PRs to this package, you guys are probably way better at this than I am.
+If you encounter any issues or have any questions or feedback regarding the Cohere API Swift Package, please don't hesitate to reach out to our support team (just me) or open an issue on the package's GitHub repository. Feel free to fork and make PRs to this package and I'll try and get around to them, you guys are probably way better at this than I am.
